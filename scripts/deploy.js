@@ -1,32 +1,26 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
-const hre = require("hardhat");
+const { ethers } = require('hardhat')
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  // deploys ERC20Factory smart contract
+  try {
+    const TokenFactoryDeployer = await ethers.getContractFactory(
+      'PermittableERC20Factory'
+    )
+    const TokenFactory = await TokenFactoryDeployer.deploy()
+    await TokenFactory.deployed()
 
-  const lockedAmount = hre.ethers.utils.parseEther("0.001");
-
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(
-    `Lock with ${ethers.utils.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+    // latest deployed test contract address is [Sepolia: 0x10A7597A84eDA3091939f56b3eE55F7F96B7e87A]
+    console.log(
+      `Successfully deployed to contract address: ${TokenFactory.address}`
+    )
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+  console.error(error)
+  process.exitCode = 1
+})
